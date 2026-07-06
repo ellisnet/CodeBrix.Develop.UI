@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CodeBrix.Develop.UI.GLib</AssemblyName>
+    <RootNamespace>CodeBrix.Develop.UI.GLib</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\CodeBrix.Develop.UI.GObject\Internal\ImportResolver.Generated.cs">
+      <Link>GObject\Internal\ImportResolver.Generated.cs</Link>
+    </Compile>
+  </ItemGroup>
+
+</Project>

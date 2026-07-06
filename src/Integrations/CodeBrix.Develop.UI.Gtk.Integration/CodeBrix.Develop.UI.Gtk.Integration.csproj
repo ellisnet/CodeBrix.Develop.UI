@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Roslyn analyzer/source-generator component: stays on net8.0 (matching
+         upstream gir.core) for compatibility with the compiler hosts that
+         load it; it is not one of the net10.0 binding libraries. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>CodeBrix.Develop.UI.Gtk.Integration</AssemblyName>
+    <RootNamespace>CodeBrix.Develop.UI.Gtk.Integration</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/GeneratedCodeAttribute.cs" Link="Shared/GeneratedCodeAttribute.cs" />
+    <Compile Include="../Shared/Attributes/SubclassAttribute.cs" Link="Shared/Attributes/SubclassAttribute.cs" />
+    <Compile Include="../Shared/DiagnosticLink.cs" Link="Shared/DiagnosticLink.cs" />
+    <Compile Include="../Shared/Type/TypeDataHelper.cs" Link="Shared/Type/TypeDataHelper.cs" />
+    <Compile Include="../Shared/Type/TypeData.cs" Link="Shared/Type/TypeData.cs" />
+    <Compile Include="../Shared/Type/TypeProperties.cs" Link="Shared/Type/TypeProperties.cs" />
+  </ItemGroup>
+
+</Project>

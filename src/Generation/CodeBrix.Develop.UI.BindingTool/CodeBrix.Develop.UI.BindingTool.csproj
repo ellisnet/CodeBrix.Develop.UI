@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>CodeBrix.Develop.UI.BindingTool</AssemblyName>
+    <RootNamespace>CodeBrix.Develop.UI.BindingTool</RootNamespace>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="Serilog" Version="4.3.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeBrix.Develop.UI.Generator\CodeBrix.Develop.UI.Generator.csproj" />
+    <ProjectReference Include="..\CodeBrix.Develop.UI.GirLoader\CodeBrix.Develop.UI.GirLoader.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/Log.cs" Link="Shared/Log.cs" />
+    <Compile Include="../Shared/Element.cs" Link="Shared/Element.cs" />
+  </ItemGroup>
+
+</Project>

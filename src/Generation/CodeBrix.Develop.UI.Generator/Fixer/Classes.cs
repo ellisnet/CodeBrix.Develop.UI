@@ -1,0 +1,27 @@
+using System.Collections.Generic;
+using CodeBrix.Develop.UI.Generator.Fixer.Class;
+
+namespace CodeBrix.Develop.UI.Generator.Fixer; //was previously: Generator.Fixer;
+
+public static class Classes
+{
+    private static readonly List<Fixer<GirModel.Class>> Fixers =
+    [
+        new PublicMethodsColldingWithPropertiesFixer(),
+        new InternalMethodsNamedLikeClassFixer(),
+        new PropertyNamedLikeClassFixer(),
+        new PropertyLikeInterfacePropertyFixer(),
+        new InterfaceMethodsCollidingWithClassMethodsFixer(),
+        new InterfaceMethodsCollidingWithClassConstructorsFixer(),
+        new PublicMethodsWithCallbackParameterWithInvalidOutRecordParameterFixer(),
+        new PublicMethodsWithInvalidOutParameterFixer(),
+        new PublicMethodsWithCallbackReturnWhichIsFundamental()
+    ];
+
+    public static void Fixup(IEnumerable<GirModel.Class> classes)
+    {
+        foreach (var @class in classes)
+            foreach (var fixer in Fixers)
+                fixer.Fixup(@class);
+    }
+}

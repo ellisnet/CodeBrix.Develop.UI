@@ -1,0 +1,92 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+
+namespace CodeBrix.Develop.UI.GObject.Internal; //was previously: GObject.Internal;
+
+public static class InstanceCache
+{
+    private static readonly object Lock = new();
+    private static readonly Dictionary<IntPtr, ToggleRef> Cache = new();
+    internal static int ObjectCount
+    {
+        get
+        {
+            lock (Lock)
+            {
+                return Cache.Count;
+            }
+        }
+    }
+
+    public static bool TryGetObject(IntPtr handle, [NotNullWhen(true)] out GObject.Object? obj)
+    {
+        lock (Lock)
+        {
+            if (Cache.TryGetValue(handle, out ToggleRef? toggleRef))
+            {
+                if (toggleRef.Object is not null)
+                {
+                    obj = toggleRef.Object;
+                    return true;
+                }
+            }
+        }
+
+        obj = null;
+        return false;
+    }
+
+    public static unsafe void AddToggleRef(GObject.Object obj)
+    {
+        var handle = obj.Handle.DangerousGetHandle();
+
+        lock (Cache)
+        {
+            Cache[handle] = new ToggleRef(obj);
+            ToggleRegistration.AddToggleRef(handle, &ToggleNotify);
+        }
+
+        Debug.WriteLine($"Handle {handle}: Added object of type '{obj.GetType()}' to {nameof(InstanceCache)}");
+    }
+
+    public static unsafe void Remove(IntPtr handle)
+    {
+        lock (Cache)
+        {
+            if (Cache.Remove(handle))
+                ToggleRegistration.RemoveToggleRef(handle, &ToggleNotify);
+        }
+
+        Debug.WriteLine($"Handle {handle}: Removed object from {nameof(InstanceCache)}.");
+    }
+
+    [UnmanagedCallersOnly]
+    private static void ToggleNotify(IntPtr data, IntPtr @object, int isLastRef)
+    {
+        try
+        {
+            lock (Lock)
+            {
+                if (Cache.TryGetValue(@object, out var toggleRef))
+                    toggleRef.ToggleReference(isLastRef != 0);
+                else
+                    Debug.WriteLine($"Handle {@object}: Could not toggle to {isLastRef} as there is no toggle reference.");
+            }
+        }
+        catch (Exception ex)
+        {
+            using var message = GLib.Variant.NewString($"{ex.Message} NativeInstance={@object}, Type={TypeNameFromInstance(@object).ConvertToString()}");
+            using var dict = GLib.VariantDict.New(null);
+            dict.InsertValue("MESSAGE", message);
+            using var variant = dict.End();
+
+            GLib.Functions.LogVariant("gircore", GLib.LogLevelFlags.LevelWarning, variant);
+        }
+    }
+
+    [DllImport(ImportResolver.Library, EntryPoint = "g_type_name_from_instance")]
+    private static extern GLib.Internal.NonNullableUtf8StringUnownedHandle TypeNameFromInstance(IntPtr instance);
+}

@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="AGENT-README.txt" />
+    <File Path="icon-codebrix-128.png" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="THIRD-PARTY-NOTICES.txt" />
+  </Folder>
+  <Folder Name="/Generation/">
+    <Project Path="src/Generation/CodeBrix.Develop.UI.GirModel/CodeBrix.Develop.UI.GirModel.csproj" />
+    <Project Path="src/Generation/CodeBrix.Develop.UI.GirLoader/CodeBrix.Develop.UI.GirLoader.csproj" />
+    <Project Path="src/Generation/CodeBrix.Develop.UI.Generator/CodeBrix.Develop.UI.Generator.csproj" />
+    <Project Path="src/Generation/CodeBrix.Develop.UI.BindingTool/CodeBrix.Develop.UI.BindingTool.csproj" />
+  </Folder>
+  <Folder Name="/Integrations/">
+    <Project Path="src/Integrations/CodeBrix.Develop.UI.GObject.Integration/CodeBrix.Develop.UI.GObject.Integration.csproj" />
+    <Project Path="src/Integrations/CodeBrix.Develop.UI.Gtk.Integration/CodeBrix.Develop.UI.Gtk.Integration.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/CodeBrix.Develop.UI.Tests/CodeBrix.Develop.UI.Tests.csproj" />
+  </Folder>
+  <Project Path="src/CodeBrix.Develop.UI/CodeBrix.Develop.UI.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Gdk/CodeBrix.Develop.UI.Gdk.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Gsk/CodeBrix.Develop.UI.Gsk.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Pango/CodeBrix.Develop.UI.Pango.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.PangoCairo/CodeBrix.Develop.UI.PangoCairo.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Cairo/CodeBrix.Develop.UI.Cairo.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.HarfBuzz/CodeBrix.Develop.UI.HarfBuzz.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Freetype2/CodeBrix.Develop.UI.Freetype2.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.GdkPixbuf/CodeBrix.Develop.UI.GdkPixbuf.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Graphene/CodeBrix.Develop.UI.Graphene.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.Gio/CodeBrix.Develop.UI.Gio.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.GObject/CodeBrix.Develop.UI.GObject.csproj" />
+  <Project Path="src/CodeBrix.Develop.UI.GLib/CodeBrix.Develop.UI.GLib.csproj" />
+</Solution>

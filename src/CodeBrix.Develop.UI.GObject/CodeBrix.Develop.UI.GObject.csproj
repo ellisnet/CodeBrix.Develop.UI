@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CodeBrix.Develop.UI.GObject</AssemblyName>
+    <RootNamespace>CodeBrix.Develop.UI.GObject</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeBrix.Develop.UI.GLib\CodeBrix.Develop.UI.GLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The GObject source generator / analyzer participates in this project's build; its DLL is packed by the CodeBrix.Develop.UI project. -->
+    <ProjectReference Include="..\Integrations\CodeBrix.Develop.UI.GObject.Integration\CodeBrix.Develop.UI.GObject.Integration.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+namespace CodeBrix.Develop.UI.Generator.Renderer.Public.ReturnType; //was previously: Generator.Renderer.Public.ReturnType;
+
+internal interface ReturnTypeConverter
+{
+    RenderableReturnType Create(GirModel.ReturnType returnType);
+    bool Supports(GirModel.ReturnType returnType);
+}

@@ -1,0 +1,109 @@
+THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
+
+CodeBrix.Develop.UI is a fully managed C# binding of the GTK 4 user-interface
+toolkit and its supporting GNOME platform libraries for .NET. It is a fork of
+the gir.core project (see entry 1 below): the binding-generation tooling, the
+hand-written library code, and the Roslyn integration projects in this
+repository were ported from gir.core release 0.8.0, and the generated binding
+code is produced by that ported tooling from GObject Introspection (GIR) data
+files (see entry 2 below).
+
+If you have any questions about any third-party code or services referenced
+here, or if you believe that any third-party code has been included in
+CodeBrix.Develop.UI in error, please open a new issue at:
+https://github.com/ellisnet/CodeBrix.Develop.UI/issues
+
+================================================================================
+
+1. gir.core
+
+   Project:   gir.core — C# bindings for GObject-based libraries
+   Source:    https://github.com/gircore/gir.core
+   Version:   Release tag 0.8.0
+              (commit 41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, 2026-06-25)
+   Authors:   Marcel Tiede and the gir.core contributors
+   License:   MIT (full text reproduced below)
+
+   Scope of incorporation: substantially all of the C# source code in this
+   repository derives from gir.core 0.8.0 —
+
+     - src/Generation/* : the GIR parsing, object-model, and code-generation
+       tooling (upstream projects GirModel, GirLoader, Generator, GirTool —
+       the latter renamed CodeBrix.Develop.UI.BindingTool in this fork).
+     - src/CodeBrix.Develop.UI* (13 library projects) : the hand-written
+       public-API and internal support code of the upstream library projects
+       Gtk-4.0, GtkSource-5, Gdk-4.0, Gsk-4.0, Pango-1.0, PangoCairo-1.0,
+       cairo-1.0, HarfBuzz-0.0, freetype2-2.0, GdkPixbuf-2.0, Graphene-1.0,
+       Gio-2.0, GObject-2.0, and GLib-2.0 (the GtkSource-5 code is compiled
+       into the main CodeBrix.Develop.UI project).
+     - src/Integrations/* : the Roslyn source-generator / analyzer projects
+       (upstream GObject-2.0.Integration and Gtk-4.0.Integration).
+     - tests/CodeBrix.Develop.UI.Tests/* : the test suites of the upstream
+       library projects listed above (converted from MSTest to xUnit v3),
+       including the tests/.../Gtk/test.bmp image asset used by the GdkPixbuf
+       texture tests.
+
+   Modifications made in this fork: namespaces renamed from the upstream
+   names (Gtk, Gdk, GLib, GObject, ...) to CodeBrix.Develop.UI.* equivalents,
+   with a "//was previously: <upstream-namespace>;" provenance comment on
+   each ported file's namespace line; multi-targeting (net8.0/net9.0/net10.0)
+   narrowed to net10.0 only; the GirTool command-line tool renamed to
+   CodeBrix.Develop.UI.BindingTool and extended to acquire GIR files from the
+   CodeBrix.Develop.UI.GnomeIntrospection repository instead of a git
+   submodule; project, assembly, and packaging metadata replaced with
+   CodeBrix conventions; all libraries shipped in a single NuGet package
+   (CodeBrix.Develop.UI) rather than one package per library.
+
+   MIT License
+
+   Copyright (c) 2020 Gir-Core
+
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+================================================================================
+
+2. GObject Introspection (GIR) data files
+
+   The generated binding code in this repository (the Generated/ folders,
+   which are produced at development time by CodeBrix.Develop.UI.BindingTool
+   and are not committed) is derived from GObject Introspection XML data
+   files describing GTK 4, GLib, GObject, Gio, Pango, Cairo, HarfBuzz,
+   GdkPixbuf, Graphene, and FreeType2. Those data files are maintained in a
+   dedicated snapshot repository, together with their own provenance and
+   license documentation:
+
+   https://github.com/ellisnet/CodeBrix.Develop.UI.GnomeIntrospection
+
+   The .gir data files carry the licenses of the libraries they describe
+   (predominantly LGPL-2.1-or-later; see that repository's
+   THIRD-PARTY-NOTICES.txt for the per-library breakdown). The GIR files are
+   API metadata consumed as generator input; no GTK or GNOME library source
+   code is incorporated into this repository or its produced assemblies, and
+   the native GNOME libraries themselves are loaded dynamically at run time
+   from the user's system and are never redistributed by this project.
+
+================================================================================
+
+Jeremy Ellis and contributors license the CodeBrix.Develop.UI project
+to you under the terms set forth in the LICENSE file, which is located at
+the root of this repository.
+
+================================================================================
+
+END OF THIRD-PARTY SOFTWARE NOTICES AND INFORMATION

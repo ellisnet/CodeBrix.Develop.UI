@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>CodeBrix.Develop.UI.PangoCairo</AssemblyName>
+    <RootNamespace>CodeBrix.Develop.UI.PangoCairo</RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CodeBrix.Develop.UI.Cairo\CodeBrix.Develop.UI.Cairo.csproj" />
+    <ProjectReference Include="..\CodeBrix.Develop.UI.GObject\CodeBrix.Develop.UI.GObject.csproj" />
+    <ProjectReference Include="..\CodeBrix.Develop.UI.Pango\CodeBrix.Develop.UI.Pango.csproj" />
+  </ItemGroup>
+
+</Project>

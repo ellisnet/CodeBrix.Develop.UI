@@ -1,0 +1,45 @@
+using System.Collections.Generic;
+
+namespace CodeBrix.Develop.UI.Generator.Renderer.Internal; //was previously: Generator.Renderer.Internal;
+
+internal static class ReturnTypeRendererCallback
+{
+    private static readonly List<ReturnType.ReturnTypeConverter> converters =
+    [
+        new ReturnType.Bitfield(),
+        new ReturnType.Class(),
+        new ReturnType.ClassArray(),
+        new ReturnType.Enumeration(),
+        new ReturnType.ForeignTypedRecordCallback(),
+        new ReturnType.GLibPointerArrayCallback(),
+        new ReturnType.Interface(),
+        new ReturnType.OpaqueTypedRecordCallback(),
+        new ReturnType.OpaqueUntypedRecordCallback(),
+        new ReturnType.PlatformStringInCallback(),
+        new ReturnType.PlatformStringArrayInCallback(),
+        new ReturnType.Pointer(),
+        new ReturnType.Long(), //Must be before primitive value type
+        new ReturnType.UnsignedLong(), //Must be before primitive value type
+        new ReturnType.CLong(), //Must be before primitive value type
+        new ReturnType.UnsignedCLong(), //Must be before primitive value type
+        new ReturnType.PrimitiveValueType(),
+        new ReturnType.PrimitiveValueTypeAlias(),
+        new ReturnType.PrimitiveValueTypeArray(),
+        new ReturnType.TypedRecordCallback(),
+        new ReturnType.TypedRecordArray(),
+        new ReturnType.Union(),
+        new ReturnType.UntypedRecordCallback(),
+        new ReturnType.Utf8StringInCallback(),
+        new ReturnType.Utf8StringArrayInCallback(),
+        new ReturnType.Void()
+    ];
+
+    public static string Render(GirModel.ReturnType returnType)
+    {
+        foreach (var converter in converters)
+            if (converter.Supports(returnType))
+                return converter.Convert(returnType).NullableTypeName;
+
+        throw new System.Exception($"Internal return type for callback of type {returnType.AnyType} can not be rendered");
+    }
+}

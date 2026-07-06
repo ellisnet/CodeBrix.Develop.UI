@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Run via Microsoft.Testing.Platform: the legacy VSTest host crashes
+         (SIGSEGV) tearing down the natively-initialized GTK runtime, while
+         the in-process xunit.v3 runner works reliably. -->
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- This project runs on Microsoft.Testing.Platform (see PropertyGroup
+         above), so the VSTest-era packages (Microsoft.NET.Test.Sdk,
+         xunit.runner.visualstudio) are intentionally absent: MTP ignores
+         them and warns (MTP0001) when they are present. -->
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="coverlet.collector" Version="10.0.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="SilverAssertions.ApacheLicenseForever" Version="1.0.164.180" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- All 13 assemblies ship together in the single CodeBrix.Develop.UI
+         package, so the tests reference them all explicitly (the main
+         project's sibling references are PrivateAssets="all" and do not
+         flow transitively). -->
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI\CodeBrix.Develop.UI.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Gdk\CodeBrix.Develop.UI.Gdk.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Gsk\CodeBrix.Develop.UI.Gsk.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Pango\CodeBrix.Develop.UI.Pango.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.PangoCairo\CodeBrix.Develop.UI.PangoCairo.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Cairo\CodeBrix.Develop.UI.Cairo.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.HarfBuzz\CodeBrix.Develop.UI.HarfBuzz.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Freetype2\CodeBrix.Develop.UI.Freetype2.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.GdkPixbuf\CodeBrix.Develop.UI.GdkPixbuf.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Graphene\CodeBrix.Develop.UI.Graphene.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.Gio\CodeBrix.Develop.UI.Gio.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.GObject\CodeBrix.Develop.UI.GObject.csproj" />
+    <ProjectReference Include="..\..\src\CodeBrix.Develop.UI.GLib\CodeBrix.Develop.UI.GLib.csproj" />
+  </ItemGroup>
+
+</Project>

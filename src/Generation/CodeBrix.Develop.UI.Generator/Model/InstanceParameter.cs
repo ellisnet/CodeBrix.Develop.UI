@@ -1,0 +1,9 @@
+namespace CodeBrix.Develop.UI.Generator.Model; //was previously: Generator.Model;
+
+internal static class InstanceParameter
+{
+    public static string GetName(GirModel.InstanceParameter instanceParameter)
+    {
+        return instanceParameter.Name.ToCamelCase().EscapeIdentifier();
+    }
+}
