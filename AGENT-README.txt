@@ -176,9 +176,23 @@ ProjectFolderMapping.cs.
 
 CODING CONVENTIONS (CodeBrix family)
 ------------------------------------
-- Target framework net10.0 only; no multi-targeting.
+- Target framework net10.0 only; no multi-targeting. THE ONE EXCEPTION is the
+  two Roslyn integration projects under src/Integrations/, which target
+  netstandard2.0 because a compiler extension has to be loadable by every
+  compiler host (including the .NET Framework-hosted compiler inside Visual
+  Studio), and because Roslyn's RS1041 rule enforces exactly that. Do not
+  "fix" them to net10.0 - each .csproj opens with a long note explaining why.
+  Their two packaging paths in src/CodeBrix.Develop.UI/CodeBrix.Develop.UI.csproj
+  name the netstandard2.0 output folder and must move with them if that ever
+  changes. Because netstandard2.0 is an older surface, those two projects also
+  set <LangVersion>latest</LangVersion>, avoid static abstract interface
+  members and the .NET 6+ StringBuilder.AppendLine(IFormatProvider, ...)
+  overloads, and pick up compiler-required shim types from
+  src/Integrations/Shared/Compatibility/.
 - File-scoped namespaces only. Ported files carry a
   "//was previously: <upstream-namespace>;" comment on the namespace line.
+  (The two shim files under src/Integrations/Shared/Compatibility/ declare
+  System.* namespaces instead; they are BCL back-fills, not CodeBrix code.)
 - No global usings; all using directives at the top of each file.
 - SITUATIONAL EXCEPTION (documented): unlike most CodeBrix repos, this
   repository keeps <Nullable>enable</Nullable> and nullable reference
@@ -203,10 +217,42 @@ TESTING
 -------
     dotnet test CodeBrix.Develop.UI.slnx
 
+With code coverage (cobertura is the portable format; omit the format
+option to get Microsoft's binary .coverage instead). Output lands in
+TestResults/ at the repository root, which is gitignored:
+
+    dotnet test CodeBrix.Develop.UI.slnx --coverage \
+        --coverage-output-format cobertura
+
 The test project runs on Microsoft.Testing.Platform (MTP), not VSTest:
 the legacy VSTest host crashes (SIGSEGV) tearing down the natively
 initialized GTK runtime. Do not add Microsoft.NET.Test.Sdk or
 xunit.runner.visualstudio back to the test csproj.
+
+Three consequences of the MTP choice, all of which differ from the rest
+of the CodeBrix family and none of which should be "simplified" away:
+
+  - global.json at the repository root opts "dotnet test" into the MTP
+    runner ("test": { "runner": "Microsoft.Testing.Platform" }). From MTP
+    v2 on the .NET 10 SDK this is REQUIRED - driving MTP through the old
+    VSTest MSBuild target is a hard error. That file pins no SDK version
+    and exists only for this opt-in.
+  - The test project references xunit.v3.mtp-v2, not plain xunit.v3.
+    Both are the same stable 3.2.2 release; the default package binds to
+    MTP v1, and mixing MTP v1 and v2 throws a TypeLoadException at
+    startup. See the note in the test csproj.
+  - Coverage comes from Microsoft.Testing.Extensions.CodeCoverage, not
+    the family's former coverlet.collector. coverlet.collector is a VSTest
+    data collector and produced NO coverage at all here while still
+    warning (MTP0001). The family is retiring coverlet generally (it was
+    referenced everywhere but never invoked); VSTest-based repos can use
+    "dotnet test --collect \"Code Coverage\"" via Microsoft.CodeCoverage
+    (MIT), which ships inside Microsoft.NET.Test.Sdk. That route is closed
+    to this project because it cannot use VSTest. NOTE the licensing
+    difference: coverlet is MIT, whereas the Microsoft coverage extension
+    ships under the proprietary MICROSOFT .NET LIBRARY license with
+    requireLicenseAcceptance=true. It is a dev-time-only dependency and
+    is not redistributed by the CodeBrix.Develop.UI package.
 
 Test-assembly parallelization is DISABLED (assembly-level
 CollectionBehavior attribute in ModuleInitialization.cs): GTK and the

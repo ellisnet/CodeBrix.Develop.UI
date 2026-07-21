@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CodeBrix.Develop.UI.Gtk.Integration.SourceAnalyzer; //was previously: Gtk.Integration.SourceAnalyzer;
 
-internal sealed class GirCore2001 : Rule
+internal sealed class GirCore2001
 {
     public static SyntaxKind SyntaxKind => SyntaxKind.ClassDeclaration;
 

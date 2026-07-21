@@ -101,9 +101,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Both Roslyn integration assemblies ship inside this single package as analyzers. -->
-    <None Include="..\Integrations\CodeBrix.Develop.UI.Gtk.Integration\bin\$(Configuration)\net8.0\CodeBrix.Develop.UI.Gtk.Integration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="..\Integrations\CodeBrix.Develop.UI.GObject.Integration\bin\$(Configuration)\net8.0\CodeBrix.Develop.UI.GObject.Integration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <!-- Both Roslyn integration assemblies ship inside this single package as analyzers.
+         These paths carry the netstandard2.0 folder because that is what a Roslyn
+         compiler extension must target - see the long note at the top of either
+         Integration .csproj. If those projects are ever retargeted, these two
+         paths must move with them or the package silently ships no analyzers. -->
+    <None Include="..\Integrations\CodeBrix.Develop.UI.Gtk.Integration\bin\$(Configuration)\netstandard2.0\CodeBrix.Develop.UI.Gtk.Integration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\Integrations\CodeBrix.Develop.UI.GObject.Integration\bin\$(Configuration)\netstandard2.0\CodeBrix.Develop.UI.GObject.Integration.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

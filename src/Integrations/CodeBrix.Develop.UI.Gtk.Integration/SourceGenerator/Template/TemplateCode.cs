@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -43,7 +44,7 @@ internal static class TemplateCode
     {
         var sb = new StringBuilder();
         foreach (var typeData in data.TypeData.UpperNestedTypes)
-            sb.AppendLine(CultureInfo.InvariantCulture, $"{typeData.Accessibility} partial {typeData.Kind} {typeData.NameGenericArguments} {{");
+            sb.AppendLine(FormattableString.Invariant($"{typeData.Accessibility} partial {typeData.Kind} {typeData.NameGenericArguments} {{"));
 
         sb.AppendLine(RenderClassContent(data));
 
@@ -100,17 +101,16 @@ internal static class TemplateCode
 
         foreach (var connection in data.Connections)
         {
-            sb.AppendLine(
-                provider: CultureInfo.InvariantCulture,
-                handler: $"""
-                          global::CodeBrix.Develop.UI.Gtk.Internal.WidgetClass.BindTemplateChildFull(
-                              widgetClass: classHandle,
-                              name: CodeBrix.Develop.UI.GLib.Internal.NonNullableUtf8StringOwnedHandle.Create("{connection.ObjectId}"),
-                              internalChild: false,
-                              structOffset: 0
-                          );
-                          """
-            );
+            sb.AppendLine(FormattableString.Invariant(
+                $"""
+                 global::CodeBrix.Develop.UI.Gtk.Internal.WidgetClass.BindTemplateChildFull(
+                     widgetClass: classHandle,
+                     name: CodeBrix.Develop.UI.GLib.Internal.NonNullableUtf8StringOwnedHandle.Create("{connection.ObjectId}"),
+                     internalChild: false,
+                     structOffset: 0
+                 );
+                 """
+            ));
         }
 
         return sb.ToString();
@@ -122,10 +122,9 @@ internal static class TemplateCode
 
         foreach (var connection in data.Connections)
         {
-            sb.AppendLine(
-                provider: CultureInfo.InvariantCulture,
-                handler: $"""{connection.MemberName} = ({connection.Type}) GetTemplateChild(GetGType(), "{connection.ObjectId}");"""
-            );
+            sb.AppendLine(FormattableString.Invariant(
+                $"""{connection.MemberName} = ({connection.Type}) GetTemplateChild(GetGType(), "{connection.ObjectId}");"""
+            ));
         }
 
         return sb.ToString();

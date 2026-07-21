@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -41,7 +42,7 @@ internal static class SubclassCode
     {
         var sb = new StringBuilder();
         foreach (var typeData in subclassData.TypeData.UpperNestedTypes)
-            sb.AppendLine(CultureInfo.InvariantCulture, $"{typeData.Accessibility} partial {typeData.Kind} {typeData.NameGenericArguments} {{");
+            sb.AppendLine(FormattableString.Invariant($"{typeData.Accessibility} partial {typeData.Kind} {typeData.NameGenericArguments} {{"));
 
         sb.AppendLine(RenderClassContent(subclassData));
 

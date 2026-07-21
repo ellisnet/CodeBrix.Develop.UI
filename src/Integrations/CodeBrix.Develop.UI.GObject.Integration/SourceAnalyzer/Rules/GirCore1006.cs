@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CodeBrix.Develop.UI.GObject.Integration.SourceAnalyzer; //was previously: GObject.Integration.SourceAnalyzer;
 
-internal sealed class GirCore1006 : Rule
+internal sealed class GirCore1006
 {
     public static SyntaxKind SyntaxKind => SyntaxKind.ConstructorDeclaration;
 

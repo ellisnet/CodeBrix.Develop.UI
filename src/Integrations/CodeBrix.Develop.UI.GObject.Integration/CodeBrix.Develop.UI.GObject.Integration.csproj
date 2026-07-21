@@ -1,10 +1,63 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- Roslyn analyzer/source-generator component: stays on net8.0 (matching
-         upstream gir.core) for compatibility with the compiler hosts that
-         load it; it is not one of the net10.0 binding libraries. -->
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- ====================================================================
+         DO NOT CHANGE THIS TO net10.0. READ THIS FIRST.
+         ====================================================================
+         Every other project in the CodeBrix family targets net10.0 and only
+         net10.0. This project is the documented exception, along with its
+         sibling CodeBrix.Develop.UI.Gtk.Integration, and it must stay on
+         netstandard2.0.
+
+         WHY: this assembly is a Roslyn compiler extension (a source generator
+         plus analyzers - see IsRoslynComponent below). It is NOT referenced by
+         the consuming application and never runs on the application's runtime.
+         It is loaded INTO THE COMPILER PROCESS, and the compiler that loads it
+         may itself be running on any of several runtimes:
+
+           - "dotnet build" / "dotnet msbuild"  -> csc on modern .NET
+           - Visual Studio on Windows (devenv,  -> csc/VBCSCompiler on
+             MSBuild.exe, the IDE language         .NET FRAMEWORK 4.7.2
+             service)
+           - JetBrains Rider / OmniSharp / the  -> varies
+             C# Dev Kit language servers
+
+         netstandard2.0 is the ONLY target framework loadable by all of those
+         hosts. An analyzer compiled for net8.0 or net10.0 cannot be loaded by
+         a .NET Framework-hosted compiler, so it silently stops running: no
+         generated code, no diagnostics, and confusing downstream build errors
+         in whatever consumes the CodeBrix.Develop.UI package.
+
+         This is also what the Roslyn analyzer-authoring rule RS1041 enforces.
+         With EnforceExtendedAnalyzerRules=true (below) and
+         Microsoft.CodeAnalysis.CSharp 5.6.0, targeting anything other than
+         netstandard2.0 raises RS1041 ("This compiler extension should not be
+         implemented in an assembly with target framework 'X'"), which the
+         repository's zero-warning policy will not tolerate.
+
+         HISTORY: this project targeted net8.0 (matching upstream gir.core,
+         which still does) until 2026-07-20. That was always incorrect for a
+         compiler extension; it simply went unflagged because the older
+         Microsoft.CodeAnalysis.CSharp 4.8.0 did not yet enforce RS1041.
+         Bumping Roslyn to 5.6.0 surfaced it. Moving to netstandard2.0 is the
+         fix - not suppressing RS1041, and not reverting Roslyn.
+
+         CONSEQUENCES you will notice while editing this project:
+           - netstandard2.0 defaults to C# 7.3, so LangVersion is pinned to
+             "latest" below to keep records, file-scoped namespaces, raw
+             string literals, etc.
+           - netstandard2.0's BCL lacks some types the modern compiler expects
+             for those features (IsExternalInit, the nullable-analysis
+             attributes). They are supplied as internal shims in
+             ../Shared/Compatibility/ rather than by taking a
+             package dependency, because analyzers must ship as a single
+             self-contained assembly.
+
+         The net10.0-only rule is unaffected for every binding library in this
+         repository; the restriction here is purely about where this DLL runs.
+         ==================================================================== -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <AssemblyName>CodeBrix.Develop.UI.GObject.Integration</AssemblyName>
     <RootNamespace>CodeBrix.Develop.UI.GObject.Integration</RootNamespace>
     <Nullable>enable</Nullable>
@@ -20,6 +73,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="../Shared/Compatibility/IsExternalInit.cs" Link="Shared/Compatibility/IsExternalInit.cs" />
+    <Compile Include="../Shared/Compatibility/NullableAttributes.cs" Link="Shared/Compatibility/NullableAttributes.cs" />
     <Compile Include="../Shared/GeneratedCodeAttribute.cs" Link="Shared/GeneratedCodeAttribute.cs" />
     <Compile Include="../Shared/Attributes/SubclassAttribute.cs" Link="Shared/Attributes/SubclassAttribute.cs" />
     <Compile Include="../Shared/DiagnosticLink.cs" Link="Shared/DiagnosticLink.cs" />

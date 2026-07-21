@@ -1,7 +1,5 @@
 using System;
 using System.CommandLine;
-using System.CommandLine.Binding;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 
@@ -13,24 +11,23 @@ public class CleanCommand : Command
         name: "clean",
         description: "Cleans the output directories")
     {
-        var target = new Argument<string>(
-            name: "target",
-            description: "Target folder to clean of all generated C# files (*.Generated.cs)"
-        );
-        AddArgument(target);
+        var target = new Argument<string>("target")
+        {
+            Description = "Target folder to clean of all generated C# files (*.Generated.cs)"
+        };
+        Add(target);
 
-        this.SetHandler(context => Execute(
-            folder: context.ParseResult.GetValueForArgument(target),
-            invocationContext: context
+        SetAction(parseResult => Execute(
+            folder: parseResult.GetValue(target) ?? string.Empty
         ));
     }
 
-    private static void Execute(string folder, InvocationContext invocationContext)
+    private static int Execute(string folder)
     {
         try
         {
-            if (!VerifyFolderExits(folder, invocationContext))
-                return;
+            if (!VerifyFolderExits(folder))
+                return 1;
 
             var deletedFiles = 0;
             var searchedFolders = 0;
@@ -47,22 +44,22 @@ public class CleanCommand : Command
             }
 
             Log.Information($"Deleted {deletedFiles} files in {searchedFolders} folders");
+            return 0;
         }
         catch (Exception ex)
         {
             Log.Exception(ex);
-            Log.Error("An error occurred while cleaning files. Please save a copy of your log output and open an issue at: https://github.com/gircore/gir.core/issues/new");
-            invocationContext.ExitCode = 1;
+            Log.Error("An error occurred while cleaning files. Please save a copy of your log output and open an issue at: https://github.com/ellisnet/CodeBrix.Develop.UI/issues/new");
+            return 1;
         }
     }
 
-    private static bool VerifyFolderExits(string folder, InvocationContext invocationContext)
+    private static bool VerifyFolderExits(string folder)
     {
         if (Directory.Exists(folder))
             return true;
 
         Log.Error($"Folder {folder} does not exist");
-        invocationContext.ExitCode = 1;
         return false;
     }
 

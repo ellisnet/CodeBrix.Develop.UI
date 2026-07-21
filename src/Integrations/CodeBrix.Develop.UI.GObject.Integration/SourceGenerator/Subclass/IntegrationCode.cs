@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
@@ -67,10 +68,9 @@ internal static class IntegrationCode
                 func: (current, nestedType) => current + nestedType.NameGenericArguments + "."
             );
 
-            sb.AppendLine(
-                provider: CultureInfo.InvariantCulture,
-                handler: $"Register<{prefix}{data.TypeData.Properties.NameGenericArguments}>();"
-            );
+            sb.AppendLine(FormattableString.Invariant(
+                $"Register<{prefix}{data.TypeData.Properties.NameGenericArguments}>();"
+            ));
         }
 
         return sb.ToString();

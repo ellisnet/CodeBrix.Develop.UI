@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace CodeBrix.Develop.UI.Gtk.Integration.SourceAnalyzer; //was previously: Gtk.Integration.SourceAnalyzer;
 
-internal sealed class GirCore2003 : Rule
+internal sealed class GirCore2003
 {
     public static SyntaxKind SyntaxKind => SyntaxKind.FieldDeclaration;
 

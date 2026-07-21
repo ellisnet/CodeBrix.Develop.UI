@@ -17,11 +17,43 @@
          above), so the VSTest-era packages (Microsoft.NET.Test.Sdk,
          xunit.runner.visualstudio) are intentionally absent: MTP ignores
          them and warns (MTP0001) when they are present. -->
-    <PackageReference Include="xunit.v3" Version="3.2.2" />
-    <PackageReference Include="coverlet.collector" Version="10.0.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <!-- NOTE the package id: "xunit.v3.mtp-v2", not plain "xunit.v3". xunit ships
+         two parallel flavours of the same 3.2.2 release - the default "xunit.v3"
+         binds to Microsoft.Testing.Platform v1 (it pulls xunit.v3.core.mtp-v1 ->
+         MTP 1.9.1), while "xunit.v3.mtp-v2" binds to the MTP v2 line (MTP 2.0.2).
+         Microsoft.Testing.Extensions.CodeCoverage 18.9.0 requires MTP 2.3.0, and
+         mixing the two majors throws at startup:
+             System.TypeLoadException: Could not load type
+             'Microsoft.Testing.Platform.Extensions.TestHost.IDataConsumer'
+             from assembly 'Microsoft.Testing.Platform, Version=2.3.0.0'
+         because NuGet unifies Microsoft.Testing.Platform up to 2.3.0 while
+         Microsoft.Testing.Platform.MSBuild stays at the v1-compiled 1.9.1.
+         Both flavours are the same stable 3.2.2 release - this is not a
+         prerelease or a downgrade. -->
+    <PackageReference Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <!-- Code coverage: this project uses the Microsoft.Testing.Platform-native
+         coverage extension rather than the CodeBrix family's usual
+         coverlet.collector. coverlet.collector is a VSTest DATA COLLECTOR - it
+         registers itself by appending to the VSTestTestAdapterPath property
+         (see SetXPlatDataCollectorPath in its .targets). Because this project
+         deliberately does not run on VSTest, that collector never ran: it
+         produced no coverage output at all, and MTP reported the dead property
+         as warning MTP0001. The extension below is the MTP equivalent and adds
+         a "coverage" switch to the test executable.
+
+         The CodeBrix family is retiring coverlet.collector generally - it was
+         referenced everywhere but never actually invoked. Repos that still run
+         on VSTest can collect coverage by passing the "collect" option to
+         dotnet test with the "Code Coverage" collector, which uses
+         Microsoft.CodeCoverage (MIT) and arrives free with
+         Microsoft.NET.Test.Sdk. This project cannot use that route because it
+         cannot use VSTest at all, hence the MTP extension below.
+
+         NOTE: unlike coverlet.collector this is referenced with plain default
+         asset flags. MTP generates a SelfRegisteredExtensions.cs that calls
+         into the extension's API, so it needs the "compile" assets that
+         coverlet's PrivateAssets/IncludeAssets pattern deliberately withheld. -->
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
     <PackageReference Include="SilverAssertions.ApacheLicenseForever" Version="1.0.164.180" />
   </ItemGroup>
 

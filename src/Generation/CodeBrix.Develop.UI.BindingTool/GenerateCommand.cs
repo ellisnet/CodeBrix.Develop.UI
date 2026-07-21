@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +12,7 @@ namespace CodeBrix.Develop.UI.BindingTool; //was previously: GirTool;
 
 public partial class GenerateCommand : Command
 {
-    private void Execute(string[] input, string output, string namespacePrefix, string? girSource, string girRef, string girCache, string? searchPathLinux, string? searchPathMacos, string? searchPathWindows, bool disableAsync, LogLevel logLevel, InvocationContext invocationContext)
+    private int Execute(string[] input, string output, string namespacePrefix, string? girSource, string girRef, string girCache, string? searchPathLinux, string? searchPathMacos, string? searchPathWindows, bool disableAsync, LogLevel logLevel)
     {
         try
         {
@@ -29,8 +28,11 @@ public partial class GenerateCommand : Command
                 (searchPathLinux, searchPathMacos, searchPathWindows) =
                     GirFileAcquisition.EnsurePlatformFolders(girSource, girRef, girCache);
 
-            var (allNamespaces, generatedNamespaces) = GetNamespaces(
-                searchPathLinux, searchPathMacos, searchPathWindows, disableAsync, input, invocationContext);
+            // A failure to load the inputs is reported through the exit code, but
+            // generation still runs over the (empty) result, matching the behaviour
+            // this command had when it set InvocationContext.ExitCode directly.
+            var (allNamespaces, generatedNamespaces, inputsLoaded) = GetNamespaces(
+                searchPathLinux, searchPathMacos, searchPathWindows, disableAsync, input);
 
             if (disableAsync)
             {
@@ -47,16 +49,17 @@ public partial class GenerateCommand : Command
             }
 
             Log.Information("Done");
+            return inputsLoaded ? 0 : 1;
         }
         catch (Exception ex)
         {
             Log.Exception(ex);
             Log.Error("An error occurred while writing files. Please save a copy of your log output and open an issue at: https://github.com/ellisnet/CodeBrix.Develop.UI/issues/new");
-            invocationContext.ExitCode = 1;
+            return 1;
         }
     }
 
-    private static (IEnumerable<Namespace>, IEnumerable<Namespace>) GetNamespaces(string? searchPathLinux, string? searchPathMacos, string? searchPathWindows, bool disableAsync, string[] input, InvocationContext invocationContext)
+    private static (IEnumerable<Namespace>, IEnumerable<Namespace>, bool) GetNamespaces(string? searchPathLinux, string? searchPathMacos, string? searchPathWindows, bool disableAsync, string[] input)
     {
         try
         {
@@ -103,17 +106,15 @@ public partial class GenerateCommand : Command
                 }
             }
 
-            return (allNamespaces, generatedNamespaces);
+            return (allNamespaces, generatedNamespaces, true);
         }
         catch (FileNotFoundException fileNotFoundException)
         {
             Log.Exception(fileNotFoundException);
             Log.Error("Please make sure that the given input files are readable.");
-
-            invocationContext.ExitCode = 1;
         }
 
-        return (Enumerable.Empty<Namespace>(), Enumerable.Empty<Namespace>());
+        return (Enumerable.Empty<Namespace>(), Enumerable.Empty<Namespace>(), false);
     }
 
     private static (DeserializedInput, DeserializedInput, DeserializedInput) LoadRepositories(string? searchPathLinux, string? searchPathMacos, string? searchPathWindows, bool disableAsync, string[] input)

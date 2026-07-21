@@ -18,13 +18,8 @@ public class Analyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
 
-        RegisterDiagnosticRule<GirCore2001>(context);
-        RegisterDiagnosticRule<GirCore2002>(context);
-        RegisterDiagnosticRule<GirCore2003>(context);
-    }
-
-    private static void RegisterDiagnosticRule<T>(AnalysisContext context) where T : Rule
-    {
-        context.RegisterSyntaxNodeAction(T.Analyze, T.SyntaxKind);
+        context.RegisterSyntaxNodeAction(GirCore2001.Analyze, GirCore2001.SyntaxKind);
+        context.RegisterSyntaxNodeAction(GirCore2002.Analyze, GirCore2002.SyntaxKind);
+        context.RegisterSyntaxNodeAction(GirCore2003.Analyze, GirCore2003.SyntaxKind);
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 
 namespace CodeBrix.Develop.UI.BindingTool; //was previously: GirTool;
 
@@ -11,92 +10,91 @@ public partial class GenerateCommand : Command
         description: "Generate C# bindings from gir files"
     )
     {
-        var inputArgument = new Argument<string[]>(
-            name: "input",
-            description: "The names of gir files which should be processed"
-        );
+        var inputArgument = new Argument<string[]>("input")
+        {
+            Description = "The names of gir files which should be processed"
+        };
 
-        var outputOption = new Option<string>(
-            aliases: new[] { "-o", "--output" },
-            description: "The directory to write the generated C# files to",
-            getDefaultValue: () => "./src"
-        );
+        var outputOption = new Option<string>("--output", "-o")
+        {
+            Description = "The directory to write the generated C# files to",
+            DefaultValueFactory = _ => "./src"
+        };
 
-        var namespacePrefixOption = new Option<string>(
-            aliases: new[] { "-np", "--namespace-prefix" },
-            description: "The prefix prepended to every generated namespace",
-            getDefaultValue: () => "CodeBrix.Develop.UI"
-        );
+        var namespacePrefixOption = new Option<string>("--namespace-prefix", "-np")
+        {
+            Description = "The prefix prepended to every generated namespace",
+            DefaultValueFactory = _ => "CodeBrix.Develop.UI"
+        };
 
-        var girSourceOption = new Option<string?>(
-            aliases: new[] { "-gs", "--gir-source" },
-            description: "A local CodeBrix.Develop.UI.GnomeIntrospection checkout to read gir files from (skips the GitHub download)"
-        );
+        var girSourceOption = new Option<string?>("--gir-source", "-gs")
+        {
+            Description = "A local CodeBrix.Develop.UI.GnomeIntrospection checkout to read gir files from (skips the GitHub download)"
+        };
 
-        var girRefOption = new Option<string>(
-            aliases: new[] { "-gr", "--gir-ref" },
-            description: "The git ref (commit/tag/branch) of the GnomeIntrospection repository to download gir files from",
-            getDefaultValue: () => GirFileAcquisition.DefaultGirRef
-        );
+        var girRefOption = new Option<string>("--gir-ref", "-gr")
+        {
+            Description = "The git ref (commit/tag/branch) of the GnomeIntrospection repository to download gir files from",
+            DefaultValueFactory = _ => GirFileAcquisition.DefaultGirRef
+        };
 
-        var girCacheOption = new Option<string>(
-            aliases: new[] { "-gc", "--gir-cache" },
-            description: "The folder downloaded gir files are cached in",
-            getDefaultValue: () => GirFileAcquisition.DefaultCacheFolder
-        );
+        var girCacheOption = new Option<string>("--gir-cache", "-gc")
+        {
+            Description = "The folder downloaded gir files are cached in",
+            DefaultValueFactory = _ => GirFileAcquisition.DefaultCacheFolder
+        };
 
-        var searchPathOptionLinux = new Option<string>(
-            aliases: new[] { "-sl", "--search-path-linux" },
-            description: "The directory which is searched for dependent linux gir files"
-        );
+        var searchPathOptionLinux = new Option<string>("--search-path-linux", "-sl")
+        {
+            Description = "The directory which is searched for dependent linux gir files"
+        };
 
-        var searchPathOptionMacos = new Option<string>(
-            aliases: new[] { "-sm", "--search-path-macos" },
-            description: "The directory which is searched for dependent macos gir files"
-        );
+        var searchPathOptionMacos = new Option<string>("--search-path-macos", "-sm")
+        {
+            Description = "The directory which is searched for dependent macos gir files"
+        };
 
-        var searchPathOptionWindows = new Option<string>(
-            aliases: new[] { "-sw", "--search-path-windows" },
-            description: "The directory which is searched for dependent windows gir files"
-        );
+        var searchPathOptionWindows = new Option<string>("--search-path-windows", "-sw")
+        {
+            Description = "The directory which is searched for dependent windows gir files"
+        };
 
-        var disableAsyncOption = new Option<bool>(
-            aliases: new[] { "-d", "--disable-async" },
-            getDefaultValue: () => false,
-            description: "Generate files synchronously - useful for debugging"
-        );
+        var disableAsyncOption = new Option<bool>("--disable-async", "-d")
+        {
+            Description = "Generate files synchronously - useful for debugging",
+            DefaultValueFactory = _ => false
+        };
 
-        var logLevelOption = new Option<LogLevel>(
-            aliases: new[] { "-l", "--log-level" },
-            getDefaultValue: () => LogLevel.Standard,
-            description: "Set the log level"
-        );
+        var logLevelOption = new Option<LogLevel>("--log-level", "-l")
+        {
+            Description = "Set the log level",
+            DefaultValueFactory = _ => LogLevel.Standard
+        };
 
-        AddArgument(inputArgument);
-        AddOption(outputOption);
-        AddOption(namespacePrefixOption);
-        AddOption(girSourceOption);
-        AddOption(girRefOption);
-        AddOption(girCacheOption);
-        AddOption(searchPathOptionLinux);
-        AddOption(searchPathOptionMacos);
-        AddOption(searchPathOptionWindows);
-        AddOption(disableAsyncOption);
-        AddOption(logLevelOption);
+        Add(inputArgument);
+        Add(outputOption);
+        Add(namespacePrefixOption);
+        Add(girSourceOption);
+        Add(girRefOption);
+        Add(girCacheOption);
+        Add(searchPathOptionLinux);
+        Add(searchPathOptionMacos);
+        Add(searchPathOptionWindows);
+        Add(disableAsyncOption);
+        Add(logLevelOption);
 
-        this.SetHandler(context => Execute(
-            input: context.ParseResult.GetValueForArgument(inputArgument),
-            output: context.ParseResult.GetValueForOption(outputOption) ?? throw new Exception("Output unknown"),
-            namespacePrefix: context.ParseResult.GetValueForOption(namespacePrefixOption) ?? string.Empty,
-            girSource: context.ParseResult.GetValueForOption(girSourceOption),
-            girRef: context.ParseResult.GetValueForOption(girRefOption) ?? GirFileAcquisition.DefaultGirRef,
-            girCache: context.ParseResult.GetValueForOption(girCacheOption) ?? GirFileAcquisition.DefaultCacheFolder,
-            searchPathLinux: context.ParseResult.GetValueForOption(searchPathOptionLinux),
-            searchPathMacos: context.ParseResult.GetValueForOption(searchPathOptionMacos),
-            searchPathWindows: context.ParseResult.GetValueForOption(searchPathOptionWindows),
-            disableAsync: context.ParseResult.GetValueForOption(disableAsyncOption),
-            logLevel: context.ParseResult.GetValueForOption(logLevelOption),
-            invocationContext: context
+        SetAction(parseResult => Execute(
+            input: parseResult.GetValue(inputArgument) ?? Array.Empty<string>(),
+            output: parseResult.GetValue(outputOption) ?? throw new Exception("Output unknown"),
+            namespacePrefix: parseResult.GetValue(namespacePrefixOption) ?? string.Empty,
+            girSource: parseResult.GetValue(girSourceOption),
+            girRef: parseResult.GetValue(girRefOption) ?? GirFileAcquisition.DefaultGirRef,
+            girCache: parseResult.GetValue(girCacheOption) ?? GirFileAcquisition.DefaultCacheFolder,
+            searchPathLinux: parseResult.GetValue(searchPathOptionLinux),
+            searchPathMacos: parseResult.GetValue(searchPathOptionMacos),
+            searchPathWindows: parseResult.GetValue(searchPathOptionWindows),
+            disableAsync: parseResult.GetValue(disableAsyncOption),
+            logLevel: parseResult.GetValue(logLevelOption)
         ));
     }
 }
