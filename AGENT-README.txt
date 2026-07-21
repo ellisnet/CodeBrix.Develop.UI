@@ -134,7 +134,8 @@ REPOSITORY LAYOUT / ARCHITECTURE
 
 The single NuGet package (produced by src/CodeBrix.Develop.UI) ships all
 13 library DLLs (and their XML doc files) in lib/net10.0/ and both
-integration DLLs as Roslyn analyzers in analyzers/dotnet/cs/.
+integration DLLs as Roslyn analyzers in analyzers/dotnet/cs/. See
+"PRODUCING THE NUGET PACKAGE" below for how and where it is built.
 
 
 GENERATING THE BINDINGS (BindingTool)
@@ -172,6 +173,68 @@ warnings in generated code cannot break the zero-warnings build; the
 project-folder mapping from canonical names (Gtk-4.0 -> CodeBrix.Develop.UI,
 Gdk-4.0 -> CodeBrix.Develop.UI.Gdk, ...) lives in the BindingTool's
 ProjectFolderMapping.cs.
+
+
+PRODUCING THE NUGET PACKAGE
+===========================
+There is NO separate pack step. src/CodeBrix.Develop.UI sets
+GeneratePackageOnBuild=true, so an ordinary Release build of the solution
+also writes the .nupkg:
+
+    dotnet build CodeBrix.Develop.UI.slnx -c Release
+
+    -> src/CodeBrix.Develop.UI/bin/Release/CodeBrix.Develop.UI.<version>.nupkg
+
+BEWARE: the build log never mentions the .nupkg. Every project line in the
+output ends in a .dll path, including the one for CodeBrix.Develop.UI, so a
+successful build looks exactly like a build that packed nothing. The only
+way to confirm the package exists is to look in bin/Release. Do not conclude
+from a clean build log that packaging is unconfigured.
+
+Only src/CodeBrix.Develop.UI is packable; every other project in the
+solution sets IsPackable=false, so exactly one .nupkg is ever produced.
+
+Picking the right file: *.nupkg is gitignored and bin/Release is never
+cleaned automatically, so that folder ACCUMULATES packages from every
+previous Release build. The version is date-stamped from the UTC clock at
+build time (1.<years-since-2026>.<UTC-day-of-year>.<UTC-minute-of-day> - see
+the long comment at the top of the .csproj), which means every build mints a
+brand-new version and the highest version number is the newest file. Always
+upload the highest-versioned .nupkg, and confirm it with a timestamp check:
+
+    ls -la src/CodeBrix.Develop.UI/bin/Release/*.nupkg
+
+Two builds within the SAME UTC minute produce the SAME version, so never
+publish two packages from within one minute of each other.
+
+Before uploading, verify the package contents (a NuGet package is a zip):
+
+    cd $(mktemp -d) && unzip -q <path-to>/CodeBrix.Develop.UI.<version>.nupkg
+    find . -name '*.dll' | sort
+
+A correct package contains exactly 15 assemblies:
+  * lib/net10.0/            13 DLLs (CodeBrix.Develop.UI.dll plus the 12
+                            sibling library DLLs) with their .xml doc files
+  * analyzers/dotnet/cs/    2 DLLs (Gtk.Integration, GObject.Integration)
+plus icon-codebrix-128.png, README.md, AGENT-README.txt and
+THIRD-PARTY-NOTICES.txt at the package root.
+
+If lib/net10.0 holds only CodeBrix.Develop.UI.dll, or analyzers/ is missing,
+the package is broken - do NOT upload it. The analyzer entries are packed
+from hard-coded ..\Integrations\...\bin\$(Configuration)\netstandard2.0\
+paths, so they silently pack nothing unless those two projects were built in
+the SAME configuration first. Building the whole .slnx guarantees that
+ordering; packing the single project in a clean tree may not.
+
+Publishing (done by hand; there is no CI publish for this repo):
+
+    dotnet nuget push src/CodeBrix.Develop.UI/bin/Release/CodeBrix.Develop.UI.<version>.nupkg \
+        --source https://api.nuget.org/v3/index.json --api-key <key>
+
+The published version is then tagged in git as v<version> (e.g.
+v1.0.202.186), matching the <repository commit="..."> recorded in the
+package's .nuspec. Build from a CLEAN working tree so that commit hash
+actually describes what shipped.
 
 
 CODING CONVENTIONS (CodeBrix family)
