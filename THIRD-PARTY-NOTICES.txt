@@ -20,7 +20,9 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
    Project:   gir.core — C# bindings for GObject-based libraries
    Source:    https://github.com/gircore/gir.core
    Version:   Release tag 0.8.0
-              (commit 41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, 2026-06-25)
+              (commit 41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, 2026-06-25),
+              plus four upstream commits cherry-picked from gir.core after
+              that tag (see "Post-0.8.0 upstream changes" below)
    Authors:   Marcel Tiede and the gir.core contributors
    License:   MIT (full text reproduced below)
 
@@ -53,6 +55,39 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
    submodule; project, assembly, and packaging metadata replaced with
    CodeBrix conventions; all libraries shipped in a single NuGet package
    (CodeBrix.Develop.UI) rather than one package per library.
+
+   Post-0.8.0 upstream changes: the following gir.core commits, made after
+   release tag 0.8.0, were cherry-picked into this fork on 2026-07-20. All
+   are MIT-licensed under the same notice reproduced below.
+
+     - 289242fc "Support abstract subclasses #1544" (Ferenc Czirok) —
+       abstract [Subclass] support in the GObject source generator and
+       SubclassRegistrar.RegisterAbstract. Released upstream in 0.8.1.
+     - 89d36f96 "GObject-2.0.Integration: Fix subclass initialization"
+       (badcel) — moves managed-wrapper creation from instance_init to the
+       GObject "constructed" vtable slot, so a subclass of a subclass no
+       longer builds one wrapper (and one toggle ref) per level of the
+       inheritance chain. Released upstream in 0.8.1.
+     - fe4e2926 "Generator hintName collision" (Ferenc Czirok) — prefixes
+       the containing namespace onto generated hint names, so two
+       [Subclass] types sharing a class name in different namespaces no
+       longer collide. Released upstream in 0.8.1.
+     - 988fadb5 "Expose Cairo routines for reading and creating .png files"
+       (Eric Zurcher) — cairo_image_surface_create_from_png and
+       cairo_surface_write_to_png bindings. Released upstream in 0.8.1.
+
+   The upstream commits that accompany 289242fc and 89d36f96 in gir.core's
+   src/Native/GirTestLib and src/Tests/Libs/GirTest-0.1.Tests were NOT
+   ported: that native C test-harness library is not part of this fork.
+
+   One deliberate divergence from upstream: 89d36f96 patched only the
+   concrete-subclass renderer, leaving upstream's abstract renderer with the
+   older inlined parent-class lookup. This fork applies the same
+   GetParentTypeClass() helper to the abstract renderer for consistency. The
+   wrapper-creating "constructed" hook itself is intentionally NOT installed
+   on abstract types, which can never be instantiated; the concrete type
+   further down the chain installs it. See the comment in
+   SubclassCode.RenderAbstractSubclassContent.
 
    MIT License
 

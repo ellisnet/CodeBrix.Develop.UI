@@ -16,13 +16,26 @@ public static unsafe class SubclassRegistrar
         where TSubclass : InstanceFactory
         where TParent : GTypeProvider
     {
-        var newType = RegisterNewGType<TSubclass, TParent>(classInit, instanceInit, qualifiedName);
+        var newType = RegisterNewGType<TSubclass, TParent>(classInit, instanceInit, qualifiedName, TypeFlags.None);
         DynamicInstanceFactory.Register(newType, TSubclass.Create);
 
         return newType;
     }
 
-    private static Type RegisterNewGType<TSubclass, TParent>(delegate* unmanaged<IntPtr, IntPtr, void> classInit, delegate* unmanaged<IntPtr, IntPtr, void> instanceInit, string? qualifiedName)
+    /// <summary>
+    /// Registers an abstract custom subclass with the GObject type system.
+    /// </summary>
+    /// <typeparam name="TSubclass">The abstract subclass being registered.</typeparam>
+    /// <typeparam name="TParent">The parent type of the subclass.</typeparam>
+    /// <param name="classInit">The class initialization callback.</param>
+    /// <param name="instanceInit">The instance initialization callback.</param>
+    /// <param name="qualifiedName">The name to register the type under, or <c>null</c> to derive one.</param>
+    /// <returns>The registered <see cref="Type" />.</returns>
+    public static Type RegisterAbstract<TSubclass, TParent>(delegate* unmanaged<IntPtr, IntPtr, void> classInit, delegate* unmanaged<IntPtr, IntPtr, void> instanceInit, string? qualifiedName)
+        where TParent : GTypeProvider
+        => RegisterNewGType<TSubclass, TParent>(classInit, instanceInit, qualifiedName, TypeFlags.Abstract);
+
+    private static Type RegisterNewGType<TSubclass, TParent>(delegate* unmanaged<IntPtr, IntPtr, void> classInit, delegate* unmanaged<IntPtr, IntPtr, void> instanceInit, string? qualifiedName, TypeFlags flags)
         where TParent : GTypeProvider
     {
         var parentType = TParent.GetGType();
@@ -46,7 +59,7 @@ public static unsafe class SubclassRegistrar
             classInit: classInit,
             instanceSize: instanceSize,
             instanceInit: instanceInit,
-            flags: TypeFlags.None
+            flags: flags
         );
 
         if (typeid == 0)

@@ -13,8 +13,9 @@ for .NET 10.0+. It lets C# applications build GTK 4
 desktop UIs, use the GObject type system (subclassing, properties,
 signals), and call the underlying GNOME platform APIs.
 
-CodeBrix.Develop.UI is a fork of the gir.core project (release 0.8.0,
-https://github.com/gircore/gir.core). All namespaces use
+CodeBrix.Develop.UI is a fork of the gir.core project 
+(https://github.com/gircore/gir.core) effectively in line with version 
+0.8.1 commit a1fd8955 — see THIRD-PARTY-NOTICES.txt. All namespaces use
 "CodeBrix.Develop.UI.*" instead of the upstream names (Gtk, Gdk, GLib,
 GObject, ...). Do NOT use the upstream GirCore namespaces or package names.
 
