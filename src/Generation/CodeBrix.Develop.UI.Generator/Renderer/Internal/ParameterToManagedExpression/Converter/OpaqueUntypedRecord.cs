@@ -32,5 +32,9 @@ internal class OpaqueUntypedRecord : ToManagedParameterConverter
         parameterData.SetSignatureName(() => signatureName);
         parameterData.SetExpression(() => $"var {variableName} ={nullable} new {Model.OpaqueUntypedRecord.GetFullyQualifiedPublicClassName(record)}({ownedHandle});");
         parameterData.SetCallName(() => variableName);
+
+        //The public class only implements IDisposable when the record has a valid free function.
+        if (record.FreeFunction is not null && Model.Method.IsValidFreeFunction(record.FreeFunction))
+            BorrowedRecordDisposal.Register(parameterData, variableName);
     }
 }

@@ -135,6 +135,17 @@ Generator conventions worth knowing before changing the emitters:
     BindingTool's ProjectFolderMapping.
   * GtkSource-5 maps into the main project's GtkSource/ subfolder, not a
     project of its own.
+  * Callback handlers BORROW their transfer-none record arguments. The record
+    converters under Renderer/Internal/ParameterToManagedExpression/Converter/
+    register a post-call Dispose (BorrowedRecordDisposal.cs, same folder's
+    parent) so the private copy or reference that OwnedHandle.FromUnowned
+    took is released when the managed callback returns, not at finalization.
+    Upstream gir.core does not do this (checked 2026-09-01); the omission was
+    the frame-rate cairo-context leak in DrawingArea draw functions that
+    OOM-killed CodeBrix.Develop. Keep the Register() call when porting
+    upstream changes to those converters, and never emit it for a record
+    whose public class is not IDisposable (opaque untyped records without a
+    free function).
 
 
 BUILDING
@@ -282,12 +293,13 @@ PROVENANCE AND VENDORED SOURCES
 ===============================
 This repository is a fork of the gir.core project
 (https://github.com/gircore/gir.core), upstream commit
-41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, with four later upstream commits
+41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, with six later upstream commits
 cherry-picked. THIRD-PARTY-NOTICES.txt is the authoritative record: it lists
 the exact upstream commits, the scope of incorporation (generation tooling,
 the thirteen library projects, the two integration projects, the test suites),
-the modifications made in this fork, one deliberate divergence in the abstract
-subclass renderer, and the MIT notice that must be preserved. Update it
+the modifications made in this fork, two deliberate divergences (the abstract
+subclass renderer, and the post-call disposal of borrowed record arguments in
+callback handlers), and the MIT notice that must be preserved. Update it
 whenever upstream code is pulled in.
 
 The GIR data files are covered by entry 2 of THIRD-PARTY-NOTICES.txt and live

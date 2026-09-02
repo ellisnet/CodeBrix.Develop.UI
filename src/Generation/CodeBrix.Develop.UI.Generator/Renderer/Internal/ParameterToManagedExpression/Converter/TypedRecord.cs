@@ -63,6 +63,8 @@ internal class TypedRecord : ToManagedParameterConverter
         parameterData.SetSignatureName(() => signatureName);
         parameterData.SetExpression(() => $"var {variableName} ={nullable} new {Model.TypedRecord.GetFullyQualifiedPublicClassName(record)}({ownedHandle});");
         parameterData.SetCallName(() => variableName);
+
+        BorrowedRecordDisposal.Register(parameterData, variableName);
     }
 
     private static void Out(ParameterToManagedData parameterData)

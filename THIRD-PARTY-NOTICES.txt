@@ -54,11 +54,15 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
    CodeBrix.Develop.UI.GnomeIntrospection repository instead of a git
    submodule; project, assembly, and packaging metadata replaced with
    CodeBrix conventions; all libraries shipped in a single NuGet package
-   (CodeBrix.Develop.UI) rather than one package per library.
+   (CodeBrix.Develop.UI) rather than one package per library; and the
+   generator's record converters register a post-call Dispose for the
+   transfer-none record arguments of callbacks (BorrowedRecordDisposal.cs),
+   described as the second deliberate divergence below.
 
    Post-0.8.0 upstream changes: the following gir.core commits, made after
-   release tag 0.8.0, were cherry-picked into this fork on 2026-07-20. All
-   are MIT-licensed under the same notice reproduced below.
+   release tag 0.8.0, were cherry-picked into this fork (the first four on
+   2026-07-20, the last two on 2026-09-01). All are MIT-licensed under the
+   same notice reproduced below.
 
      - 289242fc "Support abstract subclasses #1544" (Ferenc Czirok) —
        abstract [Subclass] support in the GObject source generator and
@@ -75,12 +79,24 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
      - 988fadb5 "Expose Cairo routines for reading and creating .png files"
        (Eric Zurcher) — cairo_image_surface_create_from_png and
        cairo_surface_write_to_png bindings. Released upstream in 0.8.1.
+     - 404667b2 "GObject-2.0.Integration: Fix comments" (badcel) — corrects
+       the doc comments the subclass source generator emits into user code:
+       the "[TGtk.emplate]" typo and the reference to the retired
+       Gtk-4.0.Integration package (this fork names its own package,
+       CodeBrix.Develop.UI, in that comment). Released upstream in 0.8.1.
+     - 11e436b4 "Generator: Use UntypedRecord model in untyped record
+       renderers" (ousnius) — the untyped-record renderers resolve handle,
+       data and class names through the UntypedRecord model instead of the
+       TypedRecord model; the generated output is byte-identical (verified
+       here as well). Not in an upstream release at the time of porting.
 
    The upstream commits that accompany 289242fc and 89d36f96 in gir.core's
    src/Native/GirTestLib and src/Tests/Libs/GirTest-0.1.Tests were NOT
    ported: that native C test-harness library is not part of this fork.
 
-   One deliberate divergence from upstream: 89d36f96 patched only the
+   Two deliberate divergences from upstream.
+
+   First: 89d36f96 patched only the
    concrete-subclass renderer, leaving upstream's abstract renderer with the
    older inlined parent-class lookup. This fork applies the same
    GetParentTypeClass() helper to the abstract renderer for consistency. The
@@ -88,6 +104,23 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
    on abstract types, which can never be instantiated; the concrete type
    further down the chain installs it. See the comment in
    SubclassCode.RenderAbstractSubclassContent.
+
+   Second: upstream's callback handlers (rendered by
+   CallbackCommonHandlerRenderUtils for the Call, Notified, Forever and
+   Async handler kinds) wrap every transfer-none record argument through
+   OwnedHandle.FromUnowned — a private boxed copy or reference — and never
+   release it, so the native object stays pinned until the SafeHandle is
+   finalized. For a callback invoked at frame rate with a heavy argument
+   (the cairo_t of GtkDrawingAreaDrawFunc) that leaked native memory until
+   the process was killed. This fork's record converters
+   (Renderer/Internal/ParameterToManagedExpression/Converter/
+   ForeignTypedRecord.cs, OpaqueTypedRecord.cs, TypedRecord.cs and
+   OpaqueUntypedRecord.cs) register a post-call Dispose through
+   BorrowedRecordDisposal.cs, so the wrapper is released as soon as the
+   managed callback returns; the native caller keeps its own reference, so
+   the object itself lives on. Upstream main (62641861, 2026-08-20) still
+   carries the leak. This fix is fork-original work by Jeremy Ellis and
+   contributors (2026-09-01), offered under the same MIT notice.
 
    MIT License
 

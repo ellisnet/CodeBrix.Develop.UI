@@ -32,5 +32,7 @@ internal class OpaqueTypedRecord : ToManagedParameterConverter
         parameterData.SetSignatureName(() => signatureName);
         parameterData.SetExpression(() => $"var {variableName} ={nullable} new {Model.OpaqueTypedRecord.GetFullyQualifiedPublicClassName(record)}({ownedHandle});");
         parameterData.SetCallName(() => variableName);
+
+        BorrowedRecordDisposal.Register(parameterData, variableName);
     }
 }

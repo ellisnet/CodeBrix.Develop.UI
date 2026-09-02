@@ -1335,6 +1335,17 @@ CUSTOM DRAWING: DRAWINGAREA, CAIRO, PANGO, GDK
         cr.Fill();
     });
 
+The `cr` handed to a draw function is BORROWED for the duration of the call,
+and the same holds for every record argument a callback delegate receives with
+transfer-none semantics (Gtk.TreePath and Gtk.TreeIter in TreeModelForeachFunc,
+GObject.Value in binding transform functions, GLib.Variant in settings
+mappings, ...): the binding disposes its wrapper the moment your delegate
+returns, so the native object is not pinned until garbage collection. Use the
+argument inside the callback only. If you need the data afterwards, copy it
+before returning (most records expose Copy()); a wrapper kept past the call
+throws ObjectDisposedException on its next use. Disposing the argument yourself
+inside the callback is harmless.
+
 `CodeBrix.Develop.UI.Cairo` is hand-written rather than generated, and it is
 the one namespace that uses ORDINARY C# CONSTRUCTORS and IDisposable rather
 than `New(...)` factories:
