@@ -47,6 +47,13 @@ REPOSITORY LAYOUT
                                        generated *.Generated.cs (gitignored)
       Internal/                        hand-written internal support code plus
                                        generated internals
+      GObject/                         CodeBrix.Develop.UI.GLib only: the root
+                                       GObject types that the GObject project
+                                       itself depends on (Public/Type.cs,
+                                       Public/GTypeProvider.cs,
+                                       Public/InstanceFactory.cs and their
+                                       Internal/ support), with its own
+                                       Public/ and Internal/ split
     src/Generation/
       CodeBrix.Develop.UI.GirModel/    object model of the GIR format
       CodeBrix.Develop.UI.GirLoader/   .gir XML parser / loader
@@ -218,7 +225,10 @@ warnings surface as test failures — matching upstream behaviour.
 Suites: Cairo/, Gio/, GLib/, GObject/, Gtk/, GtkSource/, plus PackageSmoke.cs.
 The Cairo, GLib, GObject, Gio and Gtk suites are ports of the upstream MSTest
 suites (MSTest -> xUnit v3, AwesomeAssertions -> SilverAssertions); a few tests
-are skipped because they were marked inconclusive upstream. PackageSmoke.cs is
+are skipped because they were marked inconclusive upstream. The one exception
+is Gtk/DrawingAreaDrawFuncCallHandlerTests.cs, which is fork-original: it is
+the regression test for the borrowed callback record-argument disposal
+described under GENERATING THE BINDINGS above. PackageSmoke.cs is
 native-free and asserts the shipped assembly/namespace shape.
 
 

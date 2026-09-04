@@ -92,7 +92,9 @@ consumers at individual files under WORKING EXAMPLES ON GITHUB.
                  SynchronizationContext
     GObject/     Type, Value, ParamSpec, interfaces, SList extensions
     Gtk/         constructors, methods that can return null, generated
-                 properties, signals, interface members
+                 properties, signals, interface members, and callback
+                 record-argument lifetime (the borrowed cairo context of a
+                 DrawingArea draw function)
     GtkSource/   runtime smoke tests for the GtkSourceView binding
     ModuleInitialization.cs
                  the assembly-level module initializer: initializes the whole

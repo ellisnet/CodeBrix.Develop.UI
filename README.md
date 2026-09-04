@@ -2,20 +2,43 @@
 
 A fully managed C# binding of the GTK 4 user-interface toolkit, the
 GtkSourceView source-code editing widget, and the supporting GNOME platform
-libraries (Gdk, Gsk, Pango, Cairo, HarfBuzz, GdkPixbuf, Graphene, Gio,
-GObject, and GLib) for .NET, derived from the
-[gir.core](https://github.com/gircore/gir.core) project. CodeBrix.Develop.UI
-has no dependencies other than .NET (plus the native GTK 4 runtime libraries at
-run time), and is provided as a .NET 10 library and associated
-`CodeBrix.Develop.UI` NuGet package.
+libraries (Gdk, Gsk, Pango, PangoCairo, Cairo, HarfBuzz, FreeType2, GdkPixbuf,
+Graphene, Gio, GObject, and GLib), for developers building desktop
+applications in C#. CodeBrix.Develop.UI is provided as a .NET 10 library and
+associated `CodeBrix.Develop.UI` NuGet package.
 
 CodeBrix.Develop.UI supports applications and assemblies that target Microsoft
 .NET version 10.0 and later.
-Microsoft .NET version 10.0 is a Long-Term Supported (LTS) version of .NET, and
-was released on Nov 11, 2025; and will be actively supported by Microsoft until
-Nov 14, 2028.
+Microsoft .NET version 10.0 is a Long-Term Supported (LTS) version of .NET, and was released on Nov 11, 2025; and will be actively supported by Microsoft until Nov 14, 2028.
 Please update your C#/.NET code and projects to the latest LTS version of
 Microsoft .NET.
+
+## Installation
+
+```
+dotnet add package CodeBrix.Develop.UI
+```
+
+The package has no NuGet dependencies. Note that the NuGet package ID names
+the package root, but no types live in a namespace called plain
+`CodeBrix.Develop.UI` - every type is in a per-library sub-namespace, and it is
+those you import:
+
+* NuGet package ID: `CodeBrix.Develop.UI`
+* Namespaces: `CodeBrix.Develop.UI.Gtk`, `.GtkSource`, `.Gdk`, `.Gsk`, `.Gio`,
+  `.GObject`, `.GLib`, `.Pango`, `.PangoCairo`, `.Cairo`, `.HarfBuzz`,
+  `.Freetype2`, `.GdkPixbuf`, `.Graphene` - i.e.
+  `using CodeBrix.Develop.UI.Gtk;`
+
+All of those namespaces ship inside this one package, together with the two
+Roslyn source generators as analyzers. XML documentation (IntelliSense) ships
+alongside the assemblies.
+
+No native binaries are bundled, and there is no self-contained mode: the
+machine that runs your application needs the native GTK 4 libraries installed
+(on Debian-based Linux, `sudo apt install libgtk-4-1`; they ship with most
+Linux desktops). Using the GtkSourceView binding additionally requires the
+native GtkSourceView 5 library (`sudo apt install libgtksourceview-5-0`).
 
 ## CodeBrix.Develop.UI supports:
 
@@ -33,11 +56,6 @@ Microsoft .NET.
   composite-template widgets, included in the package as analyzers
 * Linux, Windows, and macOS, with the platform differences resolved by the
   binding generator
-
-At run time your machine needs the native GTK 4 libraries installed (on
-Debian-based Linux: `sudo apt install libgtk-4-1`; they ship with most Linux
-desktops). Using the GtkSourceView binding additionally requires the native
-GtkSourceView 5 library (`sudo apt install libgtksourceview-5-0`).
 
 ## Sample Code
 
@@ -63,6 +81,33 @@ application.OnActivate += (sender, args) =>
 return application.RunWithSynchronizationContext(null);
 ```
 
+### A syntax-highlighting source editor
+
+```csharp
+using CodeBrix.Develop.UI.GtkSource;
+
+var buffer = Buffer.New(null);
+buffer.SetLanguage(LanguageManager.GetDefault().GetLanguage("c-sharp"));
+buffer.SetHighlightSyntax(true);
+buffer.SetText("public class Hello { }", -1);
+
+var view = View.NewWithBuffer(buffer);
+view.SetShowLineNumbers(true);
+view.SetTabWidth(4);
+view.SetMonospace(true);
+```
+
+## Documentation
+
+The NuGet package includes `AGENT-README.txt`, a complete API reference and usage guide written for AI coding agents - point your agent at that file when it is writing code against this library.
+
+Additional sample code and usage examples are available in the `CodeBrix.Develop.UI.Tests` project:
+https://github.com/ellisnet/CodeBrix.Develop.UI/tree/main/tests/CodeBrix.Develop.UI.Tests
+
 ## License
 
-The project is licensed under the MIT License. see: https://en.wikipedia.org/wiki/MIT_License
+CodeBrix.Develop.UI is licensed under the MIT License - see the
+[LICENSE](https://github.com/ellisnet/CodeBrix.Develop.UI/blob/main/LICENSE) file.
+
+For licensing and provenance information about the open source code included in
+this package, see [THIRD-PARTY-NOTICES.txt](https://github.com/ellisnet/CodeBrix.Develop.UI/blob/main/THIRD-PARTY-NOTICES.txt).

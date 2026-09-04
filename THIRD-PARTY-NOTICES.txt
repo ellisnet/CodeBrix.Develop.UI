@@ -21,7 +21,7 @@ https://github.com/ellisnet/CodeBrix.Develop.UI/issues
    Source:    https://github.com/gircore/gir.core
    Version:   Release tag 0.8.0
               (commit 41bd0a6b0855ec4f50c2f702d394333c4c17c3f3, 2026-06-25),
-              plus four upstream commits cherry-picked from gir.core after
+              plus six upstream commits cherry-picked from gir.core after
               that tag (see "Post-0.8.0 upstream changes" below)
    Authors:   Marcel Tiede and the gir.core contributors
    License:   MIT (full text reproduced below)

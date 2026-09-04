@@ -1335,19 +1335,34 @@ CUSTOM DRAWING: DRAWINGAREA, CAIRO, PANGO, GDK
         cr.Fill();
     });
 
-The `cr` handed to a draw function is BORROWED for the duration of the call,
-and the same holds for every record argument a callback delegate receives with
-transfer-none semantics (Gtk.TreePath and Gtk.TreeIter in TreeModelForeachFunc,
-GObject.Value in binding transform functions, GLib.Variant in settings
-mappings, ...): the binding disposes its wrapper the moment your delegate
+The `cr` handed to a draw function is BORROWED for the duration of the call.
+The same holds for the transfer-none record arguments of a callback delegate
+whose managed class implements IDisposable - typed records (Gtk.TreeIter in
+TreeModelForeachFunc, GObject.Value in binding transform functions), opaque
+typed records (Gtk.TreePath), and foreign typed records (Cairo.Context, the
+`cr` above): the binding disposes those wrappers the moment your delegate
 returns, so the native object is not pinned until garbage collection. Use the
 argument inside the callback only. If you need the data afterwards, copy it
-before returning (most records expose Copy()); a wrapper kept past the call
-throws ObjectDisposedException on its next use. Disposing the argument yourself
-inside the callback is harmless.
+before returning; `Copy()` exists only where the C library declares one
+(Gtk.TreeIter, Gtk.TreePath and GObject.Value have it, Cairo.Context and
+GLib.Variant do not), so otherwise read the fields you need while the callback
+is still running. A wrapper kept past the call throws ObjectDisposedException
+on its next use. Disposing the argument yourself inside the callback is
+harmless.
 
-`CodeBrix.Develop.UI.Cairo` is hand-written rather than generated, and it is
-the one namespace that uses ORDINARY C# CONSTRUCTORS and IDisposable rather
+Record arguments whose managed class is NOT IDisposable are left alone by the
+callback. An opaque untyped record implements IDisposable only when the C
+library declares a free function for it: GLib.Variant (in settings mappings)
+does, so it is disposed like the records above, while GLib.OptionContext,
+GLib.SequenceIter, GLib.TreeNode, Gio.IOSchedulerJob and
+Gtk.BuildableParseContext do not and are not disposed. Plain untyped records
+(GLib.Hook, GLib.HookList, GLib.Node, ...) are never disposed either. Those
+wrappers survive the call unharmed - so do not assume such an argument is dead
+once your delegate has returned, and equally do not assume a callback that
+fires at frame rate can never accumulate them.
+
+`CodeBrix.Develop.UI.Cairo`'s public surface is hand-written on top of the
+generated handles, and it uses ORDINARY C# CONSTRUCTORS and IDisposable rather
 than `New(...)` factories:
 
     new Cairo.Context(Cairo.Surface target)
@@ -1836,7 +1851,8 @@ COMMON PITFALLS TO AVOID
 ========================
 1. NATIVE LIBRARY NOT FOUND. The most common first failure is a
    `DllNotFoundException` at the first GTK call. Nothing is bundled: each
-   module resolves ONE native library by an OS-specific name.
+   module resolves its native libraries by OS-specific name - one library for
+   every module except Cairo, which needs two.
 
        module      Linux                     Windows / macOS
        ----------  ------------------------  -------------------------------
@@ -1857,6 +1873,8 @@ COMMON PITFALLS TO AVOID
                                              libpangocairo-1.0.0.dylib
        Cairo       libcairo-gobject.so.2     libcairo-gobject-2.dll
                                              libcairo-gobject.2.dylib
+                   libcairo.so.2             libcairo-2.dll
+                                             libcairo.2.dylib
        GdkPixbuf   libgdk_pixbuf-2.0.so.0    libgdk_pixbuf-2.0-0.dll
                                              libgdk_pixbuf-2.0.0.dylib
        Graphene    libgraphene-1.0.so.0      libgraphene-1.0-0.dll
@@ -1866,11 +1884,13 @@ COMMON PITFALLS TO AVOID
 
    Gtk, Gdk and Gsk all resolve to the SAME native GTK library.
 
-   Note the Cairo and HarfBuzz entries: it is the `-gobject` variant that is
-   required, not plain libcairo/libharfbuzz. Freetype2 resolves NO library at
-   all (it is type stubs only). On Debian-based Linux `sudo apt install
-   libgtk-4-1` provides everything except GtkSourceView, which needs
-   `libgtksourceview-5-0`.
+   Note the Cairo and HarfBuzz entries. Cairo needs BOTH libraries: plain
+   libcairo provides the drawing API and libcairo-gobject provides its GObject
+   integration, and the module installs a resolver for each. HarfBuzz, by
+   contrast, resolves only the `-gobject` variant, not plain libharfbuzz.
+   Freetype2 resolves NO library at all (it is type stubs only). On
+   Debian-based Linux `sudo apt install libgtk-4-1` provides everything except
+   GtkSourceView, which needs `libgtksourceview-5-0`.
 
 2. NO NATIVE LIBRARIES ARE SHIPPED, AND THERE IS NO SELF-CONTAINED MODE.
    `dotnet publish --self-contained` still requires GTK 4 on the target
@@ -1965,7 +1985,9 @@ COMMON PITFALLS TO AVOID
     have handed to a container — the container owns them. Do dispose the
     short-lived value types you create explicitly (`GObject.Value`,
     `GObject.ConstructArgument`). `Handle.DangerousGetHandle()` is exactly as
-    dangerous as it sounds and is not needed by ordinary consumer code.
+    dangerous as it sounds and is not needed by ordinary consumer code. Record
+    arguments handed to your callbacks follow a third rule of their own - see
+    item 23.
 
 19. NAMESPACE COLLISIONS ARE REAL. Type names repeated across namespaces
     include `Application` (Gtk / Gio), `ListStore` (Gtk / Gio), `Settings`
@@ -1988,6 +2010,19 @@ COMMON PITFALLS TO AVOID
     "NUL-terminated / use the whole string". The same `-1` convention applies
     to `Insert`, `InsertAtCursor`, `InsertMarkup` and
     `SearchContext.Replace`/`ReplaceAll`.
+
+23. CALLBACK RECORD ARGUMENTS ARE BORROWED. A transfer-none record handed to
+    your delegate belongs to the native caller, not to you. Where the record's
+    managed class is IDisposable - typed records (Gtk.TreeIter,
+    GObject.Value), opaque typed records (Gtk.TreePath), foreign typed records
+    (Cairo.Context) and opaque untyped records that have a free function
+    (GLib.Variant) - the binding disposes the wrapper as soon as your delegate
+    returns, and using it afterwards throws ObjectDisposedException. Copy what
+    you need before returning. Records whose managed class is not IDisposable
+    (opaque untyped records without a free function such as
+    Gtk.BuildableParseContext or GLib.SequenceIter, and plain untyped records
+    such as GLib.Hook) are not disposed for you and stay valid. Full rules,
+    with the copy caveat, under CUSTOM DRAWING above.
 
 
 WHAT THIS PACKAGE DOES NOT DO
@@ -2073,6 +2108,10 @@ below constructs real GTK objects against the real native libraries.
   FontOptions, ScaledFont)
     https://github.com/ellisnet/CodeBrix.Develop.UI/tree/main/tests/CodeBrix.Develop.UI.Tests/Cairo
 
+  Callback record-argument lifetime (the borrowed cairo context of a
+  DrawingArea draw function - the executable form of pitfall 23)
+    https://github.com/ellisnet/CodeBrix.Develop.UI/blob/main/tests/CodeBrix.Develop.UI.Tests/Gtk/DrawingAreaDrawFuncCallHandlerTests.cs
+
   All tests:
     https://github.com/ellisnet/CodeBrix.Develop.UI/tree/main/tests
 
@@ -2154,6 +2193,12 @@ QUICK REFERENCE CARD
       StyleContext.AddProviderForDisplay(Gdk.Display.GetDefault()!, css,
           Gtk.Constants.STYLE_PROVIDER_PRIORITY_APPLICATION);
       widget.AddCssClass("name");
+
+    CALLBACK RECORD ARGUMENTS
+      Borrowed for the call. The IDisposable ones (Cairo.Context,
+      Gtk.TreeIter, Gtk.TreePath, GObject.Value, GLib.Variant) are disposed
+      the moment your delegate returns - copy what you need first. See
+      pitfall 23.
 
     THREADING
       GTK is single-threaded. Marshal with await (under
